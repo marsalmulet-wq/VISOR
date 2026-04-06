@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitor Red Eléctrica ESP</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
 
         :root {
             --bg-color: #05070a;
-            --panel-bg: rgba(15, 23, 42, 0.6);
+            --panel-bg: rgba(15, 23, 42, 0.7);
             --border-color: #1e293b;
             --text-main: #f8fafc;
             --text-muted: #64748b;
@@ -32,119 +32,65 @@
                               radial-gradient(circle at 85% 30%, rgba(245, 158, 11, 0.03) 0%, transparent 50%);
         }
 
-        .container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
 
         /* Header */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 20px;
-        }
-
-        .title-group h1 { font-weight: 900; font-size: 32px; letter-spacing: -1px; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
+        .title-group h1 { font-weight: 800; font-size: 28px; letter-spacing: -1px; }
         .title-group h1 span { color: var(--accent-blue); font-style: italic; }
         .subtitle { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); margin-top: 5px; }
+        .live-dot { display: inline-block; width: 10px; height: 10px; background: var(--accent-red); border-radius: 50%; margin-right: 10px; box-shadow: 0 0 10px var(--accent-red); animation: pulse 1.5s infinite; }
+
+        /* Layout Principal */
+        .dashboard { display: grid; grid-template-columns: 3fr 2fr; gap: 20px; }
+        @media (max-width: 800px) { .dashboard { grid-template-columns: 1fr; } }
+
+        .panel { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 25px; backdrop-filter: blur(10px); }
+        .panel-title { font-size: 12px; font-weight: 800; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+
+        /* Mapa Vectorial */
+        .map-container { position: relative; width: 100%; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; }
+        .spain-svg { width: 90%; height: 90%; filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.1)); }
+        .spain-path { fill: #081121; stroke: #1e3a8a; stroke-width: 2; stroke-linejoin: round; }
+        .grid-lines { stroke: rgba(59, 130, 246, 0.05); stroke-width: 1; }
+
+        /* Nodos Interactivos */
+        .node { position: absolute; display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -50%); cursor: pointer; transition: all 0.2s; }
+        .node:hover { transform: translate(-50%, -50%) scale(1.2); z-index: 10; }
+        .node.active .node-dot { box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2); }
+        .node-dot { width: 14px; height: 14px; border-radius: 50%; position: relative; z-index: 2; border: 2px solid #fff; }
+        .node-pulse { position: absolute; inset: -6px; border-radius: 50%; animation: ping 2s infinite; z-index: 1; }
+        .node-label { margin-top: 8px; font-size: 10px; font-weight: bold; padding: 4px 8px; border-radius: 6px; background: #000; border: 1px solid var(--border-color); white-space: nowrap; font-family: 'JetBrains Mono', monospace; pointer-events: none; }
+
+        /* Colores de estado */
+        .node[data-status="export"] .node-dot, .node[data-status="export"] .node-pulse { background: var(--accent-cyan); }
+        .node[data-status="solar"] .node-dot, .node[data-status="solar"] .node-pulse { background: var(--accent-yellow); }
+        .node[data-status="alert"] .node-dot, .node[data-status="alert"] .node-pulse { background: var(--accent-red); }
+        .node[data-status="stable"] .node-dot, .node[data-status="stable"] .node-pulse { background: var(--accent-green); }
+
+        /* Panel de Detalles (Derecha) */
+        .details-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
+        .region-name { font-size: 24px; font-weight: 800; color: var(--text-main); margin-bottom: 5px; }
+        .region-status { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
         
-        .live-dot {
-            display: inline-block; width: 10px; height: 10px; background: var(--accent-red);
-            border-radius: 50%; margin-right: 10px;
-            box-shadow: 0 0 10px var(--accent-red);
-            animation: pulse 1.5s infinite;
-        }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .stat-box { background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); padding: 15px; border-radius: 12px; }
+        .stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: bold; margin-bottom: 5px; }
+        .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: bold; color: var(--text-main); }
 
-        .price-box {
-            background: var(--panel-bg); border: 1px solid var(--border-color);
-            padding: 15px 25px; border-radius: 12px; text-align: right; backdrop-filter: blur(10px);
-        }
-
-        .price-box p { font-size: 10px; text-transform: uppercase; color: var(--text-muted); font-weight: bold; letter-spacing: 1px; }
-        .price-value { font-family: 'JetBrains Mono', monospace; font-size: 28px; color: var(--accent-green); font-weight: bold; }
-
-        /* Grid Principal */
-        .main-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; }
-        @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
-
-        /* Barras de Energía */
-        .energy-panel { display: flex; flex-direction: column; gap: 15px; }
-        .energy-card { background: var(--panel-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 16px; }
-        
-        .card-header { display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center;}
-        .card-title { font-size: 14px; font-weight: bold; }
-        .card-value { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: bold; }
-
-        .progress-bg { width: 100%; height: 8px; background: #0f172a; border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; border-radius: 10px; transition: width 1s ease-in-out; }
-
-        .wind .progress-fill { background: var(--accent-cyan); box-shadow: 0 0 15px var(--accent-cyan); }
-        .wind .card-value { color: var(--accent-cyan); }
-        .solar .progress-fill { background: var(--accent-yellow); box-shadow: 0 0 15px var(--accent-yellow); }
-        .solar .card-value { color: var(--accent-yellow); }
-        .gas .progress-fill { background: var(--accent-red); box-shadow: 0 0 15px var(--accent-red); }
-        .gas .card-value { color: var(--accent-red); }
-
-        /* Mapa de España Vectorial Mejorado */
-        .map-panel {
-            background: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            position: relative;
-            min-height: 550px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .map-title { position: absolute; top: 20px; left: 20px; font-size: 12px; color: var(--text-muted); font-weight: bold; letter-spacing: 1px; }
-
-        .map-container { position: relative; width: 100%; max-width: 600px; aspect-ratio: 4/3; }
-        
-        /* Silueta más realista de la Península (Estilo Radar) */
-        .spain-svg { width: 100%; height: 100%; filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.15)); }
-        .spain-path { 
-            fill: #081121; 
-            stroke: #1e3a8a; 
-            stroke-width: 3; 
-            stroke-linejoin: round;
-        }
-        .grid-lines { stroke: rgba(59, 130, 246, 0.1); stroke-width: 1; }
-
-        /* Nodos de Comunidades */
-        .node { position: absolute; display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -50%); transition: all 0.3s; cursor: crosshair; }
-        .node:hover { z-index: 10; transform: translate(-50%, -50%) scale(1.1); }
-        
-        .node-dot { width: 10px; height: 10px; border-radius: 50%; position: relative; z-index: 2; }
-        .node-pulse { position: absolute; inset: -4px; border-radius: 50%; animation: ping 2s infinite; z-index: 1; }
-        
-        .node-label { 
-            margin-top: 6px; font-size: 9px; font-weight: bold; padding: 4px 8px; 
-            border-radius: 4px; background: rgba(5, 7, 10, 0.9); border: 1px solid var(--border-color); 
-            white-space: nowrap; font-family: 'JetBrains Mono', monospace;
-            opacity: 0.8; transition: opacity 0.3s;
-        }
-        .node:hover .node-label { opacity: 1; border-color: var(--accent-blue); box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
-
-        /* Colores por estado */
-        .status-export .node-dot, .status-export .node-pulse { background: var(--accent-cyan); }
-        .status-export .node-label { color: var(--accent-cyan); }
-        
-        .status-solar .node-dot, .status-solar .node-pulse { background: var(--accent-yellow); }
-        .status-solar .node-label { color: var(--accent-yellow); }
-        
-        .status-alert .node-dot, .status-alert .node-pulse { background: var(--accent-red); }
-        .status-alert .node-label { color: var(--accent-red); }
-
-        .status-stable .node-dot, .status-stable .node-pulse { background: var(--accent-green); }
-        .status-stable .node-label { color: var(--accent-green); }
-
-        .status-nuclear .node-dot, .status-nuclear .node-pulse { background: var(--accent-purple); }
-        .status-nuclear .node-label { color: var(--accent-purple); }
+        /* Barras de progreso locales */
+        .local-mix { display: flex; flex-direction: column; gap: 15px; }
+        .mix-row { display: flex; flex-direction: column; gap: 5px; }
+        .mix-labels { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; }
+        .bar-bg { width: 100%; height: 6px; background: #0f172a; border-radius: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
 
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        @keyframes ping { 75%, 100% { transform: scale(2.5); opacity: 0; } }
+        @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+
+        /* Instrucción inicial */
+        #placeholder-msg { text-align: center; color: var(--text-muted); font-style: italic; margin-top: 50px; }
+        #details-content { display: none; }
     </style>
 </head>
 <body>
@@ -153,125 +99,177 @@
         <header>
             <div class="title-group">
                 <h1><span class="live-dot"></span>RED ELÉCTRICA <span>ESP</span></h1>
-                <p class="subtitle">SISTEMA_NACIONAL // MONITORIZACIÓN TOPOLÓGICA ACTIVA</p>
+                <p class="subtitle">SISTEMA_NACIONAL // INTERFAZ DE ANÁLISIS REGIONAL</p>
             </div>
-            <div class="price-box">
-                <p>Precio Mercado Libre</p>
-                <div class="price-value"><span id="price-val">0.153</span> €/kWh</div>
+            <div style="text-align: right;">
+                <p style="font-size: 10px; color: var(--text-muted); font-weight: bold; text-transform: uppercase;">Precio Mercado</p>
+                <p style="font-family: 'JetBrains Mono', monospace; font-size: 20px; color: var(--accent-green); font-weight: bold;">0.153 €/kWh</p>
             </div>
         </header>
 
-        <div class="main-grid">
-            <div class="energy-panel">
-                <div class="energy-card wind">
-                    <div class="card-header"><span class="card-title">Eólica Flotante & Terrestre</span><span class="card-value"><span id="wind-val">43.0</span>%</span></div>
-                    <div class="progress-bg"><div class="progress-fill" id="wind-bar" style="width: 43%;"></div></div>
-                </div>
-                <div class="energy-card solar">
-                    <div class="card-header"><span class="card-title">Solar Fotovoltaica</span><span class="card-value"><span id="solar-val">36.3</span>%</span></div>
-                    <div class="progress-bg"><div class="progress-fill" id="solar-bar" style="width: 36.3%;"></div></div>
-                </div>
-                <div class="energy-card gas">
-                    <div class="card-header"><span class="card-title">Ciclo Combinado (Gas)</span><span class="card-value"><span id="gas-val">14.3</span>%</span></div>
-                    <div class="progress-bg"><div class="progress-fill" id="gas-bar" style="width: 14.3%;"></div></div>
-                </div>
-            </div>
-
-            <div class="map-panel">
-                <span class="map-title">VISOR DE NODOS AUTONÓMICOS</span>
-                
+        <div class="dashboard">
+            <div class="panel">
+                <div class="panel-title">Visor Topológico (Haz clic en un nodo)</div>
                 <div class="map-container">
                     <svg viewBox="0 0 1000 800" class="spain-svg">
                         <path class="grid-lines" d="M0,200 L1000,200 M0,400 L1000,400 M0,600 L1000,600 M200,0 L200,800 M400,0 L400,800 M600,0 L600,800 M800,0 L800,800" />
-                        
                         <path class="spain-path" d="M 120,100 L 250,80 L 400,90 L 550,110 L 700,160 L 880,220 L 860,350 L 800,480 L 700,600 L 550,700 L 400,750 L 350,680 L 380,550 L 320,400 L 280,300 L 220,200 L 150,150 Z" />
                     </svg>
 
-                    <div class="node status-export" style="top: 18%; left: 18%;">
+                    <div class="node" data-id="galicia" data-status="export" style="top: 18%; left: 18%;" onclick="loadRegionData('galicia')">
                         <div class="node-pulse"></div><div class="node-dot"></div>
-                        <div class="node-label">GALICIA<br>EÓLICA: +850MW</div>
+                        <div class="node-label">GALICIA</div>
                     </div>
                     
-                    <div class="node status-stable" style="top: 15%; left: 35%;">
+                    <div class="node" data-id="madrid" data-status="alert" style="top: 50%; left: 50%;" onclick="loadRegionData('madrid')">
                         <div class="node-pulse"></div><div class="node-dot"></div>
-                        <div class="node-label">ASTURIAS<br>ESTABLE</div>
+                        <div class="node-label">MADRID</div>
                     </div>
 
-                    <div class="node status-export" style="top: 17%; left: 55%;">
+                    <div class="node" data-id="andalucia" data-status="solar" style="top: 75%; left: 48%;" onclick="loadloadRegionData('andalucia')">
                         <div class="node-pulse"></div><div class="node-dot"></div>
-                        <div class="node-label">PAÍS VASCO<br>RED ÓPTIMA</div>
+                        <div class="node-label">ANDALUCÍA</div>
                     </div>
 
-                    <div class="node status-nuclear" style="top: 30%; left: 82%;">
+                    <div class="node" data-id="cataluna" data-status="stable" style="top: 30%; left: 82%;" onclick="loadRegionData('cataluna')">
                         <div class="node-pulse"></div><div class="node-dot"></div>
-                        <div class="node-label">CATALUÑA<br>NUCLEAR BASE</div>
-                    </div>
-
-                    <div class="node status-stable" style="top: 35%; left: 65%;">
-                        <div class="node-pulse"></div><div class="node-dot"></div>
-                        <div class="node-label">ARAGÓN<br>MIX EQUILIBRADO</div>
-                    </div>
-
-                    <div class="node status-stable" style="top: 35%; left: 40%;">
-                        <div class="node-pulse"></div><div class="node-dot"></div>
-                        <div class="node-label">CASTILLA Y LEÓN<br>RESERVA HIDRO</div>
-                    </div>
-
-                    <div class="node status-alert" style="top: 50%; left: 50%;">
-                        <div class="node-pulse"></div><div class="node-dot"></div>
-                        <div class="node-label">MADRID<br>ALTA DEMANDA (4.2GW)</div>
-                    </div>
-
-                    <div class="node status-solar" style="top: 60%; left: 35%;">
-                        <div class="node-pulse"></div><div class="node-dot"></div>
-                        <div class="node-label">EXTREMADURA<br>PICO SOLAR</div>
-                    </div>
-
-                    <div class="node status-stable" style="top: 55%; left: 75%;">
-                        <div class="node-pulse"></div><div class="node-dot"></div>
-                        <div class="node-label">C. VALENCIANA<br>OPERACIONAL</div>
-                    </div>
-
-                    <div class="node status-solar" style="top: 75%; left: 48%;">
-                        <div class="node-pulse"></div><div class="node-dot"></div>
-                        <div class="node-label">ANDALUCÍA<br>INYECCIÓN FOTOVOLTAICA</div>
-                    </div>
-
-                    <div class="node status-stable" style="top: 50%; left: 95%;">
-                        <div class="node-pulse"></div><div class="node-dot"></div>
-                        <div class="node-label">BALEARES<br>ENLACE PENÍNSULA</div>
+                        <div class="node-label">CATALUÑA</div>
                     </div>
                     
-                    <div class="node status-export" style="top: 85%; left: 15%;">
+                    <div class="node" data-id="aragon" data-status="stable" style="top: 35%; left: 65%;" onclick="loadRegionData('aragon')">
                         <div class="node-pulse"></div><div class="node-dot"></div>
-                        <div class="node-label">CANARIAS<br>EÓLICA MARINA</div>
+                        <div class="node-label">ARAGÓN</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">Análisis de Nodo Seleccionado</div>
+                
+                <div id="placeholder-msg">
+                    <svg style="width: 48px; height: 48px; margin: 0 auto 10px auto; color: #334155;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                    Selecciona una Comunidad Autónoma en el mapa para ver su desglose en tiempo real.
+                </div>
+
+                <div id="details-content">
+                    <div class="details-header">
+                        <div>
+                            <h2 class="region-name" id="r-name">--</h2>
+                            <span class="region-status" id="r-status" style="background: var(--border-color); color: white;">--</span>
+                        </div>
                     </div>
 
+                    <div class="stat-grid">
+                        <div class="stat-box">
+                            <div class="stat-label">Generación Total</div>
+                            <div class="stat-value" id="r-gen" style="color: var(--accent-cyan);">-- MW</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Demanda Actual</div>
+                            <div class="stat-value" id="r-dem">-- MW</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Balance Red</div>
+                            <div class="stat-value" id="r-bal">--</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Huella CO2</div>
+                            <div class="stat-value" id="r-co2" style="color: var(--text-muted);">-- g/kWh</div>
+                        </div>
+                    </div>
+
+                    <h3 style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 15px;">Mix de Generación Local</h3>
+                    <div class="local-mix">
+                        <div class="mix-row">
+                            <div class="mix-labels"><span style="color: var(--accent-cyan);">Eólica</span> <span id="mix-wind-val">--%</span></div>
+                            <div class="bar-bg"><div class="bar-fill" id="mix-wind-bar" style="background: var(--accent-cyan); width: 0%;"></div></div>
+                        </div>
+                        <div class="mix-row">
+                            <div class="mix-labels"><span style="color: var(--accent-yellow);">Solar FV</span> <span id="mix-solar-val">--%</span></div>
+                            <div class="bar-bg"><div class="bar-fill" id="mix-solar-bar" style="background: var(--accent-yellow); width: 0%;"></div></div>
+                        </div>
+                        <div class="mix-row">
+                            <div class="mix-labels"><span style="color: var(--accent-green);">Hidro/Nuclear</span> <span id="mix-base-val">--%</span></div>
+                            <div class="bar-bg"><div class="bar-fill" id="mix-base-bar" style="background: var(--accent-green); width: 0%;"></div></div>
+                        </div>
+                        <div class="mix-row">
+                            <div class="mix-labels"><span style="color: var(--accent-red);">Gas (Ciclo Comb.)</span> <span id="mix-gas-val">--%</span></div>
+                            <div class="bar-bg"><div class="bar-fill" id="mix-gas-bar" style="background: var(--accent-red); width: 0%;"></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const priceEl = document.getElementById('price-val');
-        const windVal = document.getElementById('wind-val'); const windBar = document.getElementById('wind-bar');
-        const solarVal = document.getElementById('solar-val'); const solarBar = document.getElementById('solar-bar');
-        const gasVal = document.getElementById('gas-val'); const gasBar = document.getElementById('gas-bar');
+        // Base de datos simulada para cada comunidad
+        const regionDB = {
+            'galicia': {
+                name: 'Galicia', status: 'EXPORTANDO', statusColor: 'var(--accent-cyan)',
+                gen: '3,450', dem: '1,820', bal: '+1,630 MW', co2: '45',
+                mix: { wind: 65, solar: 5, base: 25, gas: 5 }
+            },
+            'madrid': {
+                name: 'Comunidad de Madrid', status: 'ALTA DEMANDA', statusColor: 'var(--accent-red)',
+                gen: '850', dem: '4,200', bal: '-3,350 MW', co2: '120',
+                mix: { wind: 5, solar: 15, base: 10, gas: 70 }
+            },
+            'andalucia': {
+                name: 'Andalucía', status: 'INYECCIÓN SOLAR', statusColor: 'var(--accent-yellow)',
+                gen: '5,100', dem: '3,900', bal: '+1,200 MW', co2: '60',
+                mix: { wind: 20, solar: 55, base: 10, gas: 15 }
+            },
+            'cataluna': {
+                name: 'Cataluña', status: 'BASE NUCLEAR', statusColor: 'var(--accent-green)',
+                gen: '4,800', dem: '4,500', bal: '+300 MW', co2: '30',
+                mix: { wind: 10, solar: 15, base: 60, gas: 15 }
+            },
+            'aragon': {
+                name: 'Aragón', status: 'MIX ÓPTIMO', statusColor: 'var(--accent-green)',
+                gen: '2,900', dem: '1,100', bal: '+1,800 MW', co2: '40',
+                mix: { wind: 45, solar: 30, base: 20, gas: 5 }
+            }
+        };
 
-        let currentPrice = 0.153; let wind = 43.0; let solar = 36.3; let gas = 14.3;
+        // Función que se ejecuta al hacer clic en el mapa
+        window.loadRegionData = function(id) {
+            // Ocultar mensaje inicial y mostrar datos
+            document.getElementById('placeholder-msg').style.display = 'none';
+            document.getElementById('details-content').style.display = 'block';
 
-        setInterval(() => {
-            currentPrice = currentPrice + (Math.random() * 0.004 - 0.002);
-            priceEl.innerText = currentPrice.toFixed(3);
+            // Resaltar el nodo activo en el mapa
+            document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+            document.querySelector(`.node[data-id="${id}"]`).classList.add('active');
 
-            wind = Math.max(0, Math.min(100, wind + (Math.random() * 1 - 0.5)));
-            solar = Math.max(0, Math.min(100, solar + (Math.random() * 1 - 0.5)));
-            gas = Math.max(0, Math.min(100, gas + (Math.random() * 1 - 0.5)));
+            // Obtener datos
+            const data = regionDB[id];
 
-            windVal.innerText = wind.toFixed(1); windBar.style.width = wind + '%';
-            solarVal.innerText = solar.toFixed(1); solarBar.style.width = solar + '%';
-            gasVal.innerText = gas.toFixed(1); gasBar.style.width = gas + '%';
-        }, 2500); 
+            // Actualizar textos
+            document.getElementById('r-name').innerText = data.name;
+            document.getElementById('r-status').innerText = data.status;
+            document.getElementById('r-status').style.background = data.statusColor;
+            document.getElementById('r-gen').innerText = data.gen + ' MW';
+            document.getElementById('r-dem').innerText = data.dem + ' MW';
+            document.getElementById('r-bal').innerText = data.bal;
+            document.getElementById('r-bal').style.color = data.bal.startsWith('+') ? 'var(--accent-green)' : 'var(--accent-red)';
+            document.getElementById('r-co2').innerText = data.co2 + ' g/kWh';
+
+            // Animar las barras de progreso
+            setTimeout(() => {
+                document.getElementById('mix-wind-val').innerText = data.mix.wind + '%';
+                document.getElementById('mix-wind-bar').style.width = data.mix.wind + '%';
+
+                document.getElementById('mix-solar-val').innerText = data.mix.solar + '%';
+                document.getElementById('mix-solar-bar').style.width = data.mix.solar + '%';
+
+                document.getElementById('mix-base-val').innerText = data.mix.base + '%';
+                document.getElementById('mix-base-bar').style.width = data.mix.base + '%';
+
+                document.getElementById('mix-gas-val').innerText = data.mix.gas + '%';
+                document.getElementById('mix-gas-bar').style.width = data.mix.gas + '%';
+            }, 50); // Pequeño retraso para que la animación CSS se active
+        };
     </script>
 </body>
 </html>
