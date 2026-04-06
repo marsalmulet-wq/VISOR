@@ -4,136 +4,247 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitor Red Eléctrica ESP</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
     <style>
-        body { background-color: #05070a; color: #e2e8f0; overflow-x: hidden; }
-        .radar-pulse {
-            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #05070a;
+            --panel-bg: rgba(15, 23, 42, 0.6);
+            --border-color: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #64748b;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-yellow: #f59e0b;
+            --accent-cyan: #06b6d4;
+            --accent-red: #ef4444;
         }
-        @keyframes pulse-ring {
-            0% { transform: scale(0.8); opacity: 0.5; }
-            100% { transform: scale(2.5); opacity: 0; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                              radial-gradient(circle at 85% 30%, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
         }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .title-group h1 { font-weight: 900; font-size: 32px; letter-spacing: -1px; }
+        .title-group h1 span { color: var(--accent-blue); font-style: italic; }
+        .subtitle { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); margin-top: 5px; }
+        
+        .live-dot {
+            display: inline-block; width: 10px; height: 10px; background: var(--accent-red);
+            border-radius: 50%; margin-right: 10px;
+            box-shadow: 0 0 10px var(--accent-red);
+            animation: pulse 1.5s infinite;
+        }
+
+        .price-box {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            padding: 15px 25px;
+            border-radius: 12px;
+            text-align: right;
+            backdrop-filter: blur(10px);
+        }
+
+        .price-box p { font-size: 10px; text-transform: uppercase; color: var(--text-muted); font-weight: bold; letter-spacing: 1px; }
+        .price-value { font-family: 'JetBrains Mono', monospace; font-size: 28px; color: var(--accent-green); font-weight: bold; }
+
+        /* Grid Principal */
+        .main-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; }
+        @media (max-width: 768px) { .main-grid { grid-template-columns: 1fr; } }
+
+        /* Barras de Energía */
+        .energy-panel { display: flex; flex-direction: column; gap: 15px; }
+        .energy-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 16px;
+        }
+        
+        .card-header { display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center;}
+        .card-title { font-size: 14px; font-weight: bold; }
+        .card-value { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: bold; }
+
+        .progress-bg { width: 100%; height: 8px; background: #0f172a; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 10px; transition: width 1s ease-in-out; }
+
+        .wind .progress-fill { background: var(--accent-cyan); box-shadow: 0 0 15px var(--accent-cyan); }
+        .wind .card-value { color: var(--accent-cyan); }
+        
+        .solar .progress-fill { background: var(--accent-yellow); box-shadow: 0 0 15px var(--accent-yellow); }
+        .solar .card-value { color: var(--accent-yellow); }
+        
+        .gas .progress-fill { background: var(--accent-red); box-shadow: 0 0 15px var(--accent-red); }
+        .gas .card-value { color: var(--accent-red); }
+
+        /* Mapa de España Vectorial (Hecho a mano en SVG para no usar archivos externos) */
+        .map-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            min-height: 400px;
+            padding: 20px;
+        }
+
+        .map-container { position: relative; width: 100%; max-width: 500px; }
+        
+        .spain-svg { width: 100%; height: auto; filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.1)); }
+        .spain-path { fill: #0f172a; stroke: #334155; stroke-width: 2; transition: all 0.3s; }
+        .spain-path:hover { fill: rgba(59, 130, 246, 0.2); stroke: var(--accent-blue); }
+
+        /* Nodos en el mapa */
+        .node { position: absolute; display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -50%); }
+        .node-dot { width: 12px; height: 12px; border-radius: 50%; position: relative; z-index: 2; }
+        .node-pulse { position: absolute; inset: -5px; border-radius: 50%; animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; z-index: 1; }
+        .node-label { margin-top: 8px; font-size: 10px; font-weight: bold; padding: 4px 8px; border-radius: 4px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); white-space: nowrap;}
+
+        .node.galicia { top: 20%; left: 15%; }
+        .node.galicia .node-dot, .node.galicia .node-pulse { background: var(--accent-cyan); }
+        .node.galicia .node-label { color: var(--accent-cyan); }
+
+        .node.andalucia { top: 80%; left: 45%; }
+        .node.andalucia .node-dot, .node.andalucia .node-pulse { background: var(--accent-yellow); }
+        .node.andalucia .node-label { color: var(--accent-yellow); }
+
+        .node.madrid { top: 50%; left: 48%; }
+        .node.madrid .node-dot, .node.madrid .node-pulse { background: var(--accent-red); }
+        .node.madrid .node-label { color: var(--accent-red); }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        @keyframes ping { 75%, 100% { transform: scale(2.5); opacity: 0; } }
     </style>
 </head>
 <body>
-    <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+    <div class="container">
+        <header>
+            <div class="title-group">
+                <h1><span class="live-dot"></span>RED ELÉCTRICA <span>ESP</span></h1>
+                <p class="subtitle">SISTEMA_NACIONAL // DATOS_TIEMPO_REAL</p>
+            </div>
+            <div class="price-box">
+                <p>Precio Actual PVPC</p>
+                <div class="price-value"><span id="price-val">0.145</span> €/kWh</div>
+            </div>
+        </header>
 
-        // Iconos integrados
-        const Icons = {
-            Zap: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>,
-            Wind: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>,
-            Sun: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>,
-            Flame: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>,
-        };
-
-        const EnergyBar = ({ label, value, icon, color }) => (
-            <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800 mb-4">
-                <div className="flex justify-between items-center mb-3">
-                    <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${color} bg-opacity-10 text-slate-200`}>{icon}</div>
-                        <span className="text-sm font-semibold">{label}</span>
+        <div class="main-grid">
+            <div class="energy-panel">
+                <div class="energy-card wind">
+                    <div class="card-header">
+                        <span class="card-title">Eólica</span>
+                        <span class="card-value"><span id="wind-val">42</span>%</span>
                     </div>
-                    <span className="font-mono font-bold text-lg">{value}%</span>
+                    <div class="progress-bg"><div class="progress-fill" id="wind-bar" style="width: 42%;"></div></div>
                 </div>
-                <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-                    <div className={`h-full ${color} transition-all duration-1000`} style={{ width: `${value}%` }}></div>
+
+                <div class="energy-card solar">
+                    <div class="card-header">
+                        <span class="card-title">Solar Fotovoltaica</span>
+                        <span class="card-value"><span id="solar-val">35</span>%</span>
+                    </div>
+                    <div class="progress-bg"><div class="progress-fill" id="solar-bar" style="width: 35%;"></div></div>
+                </div>
+
+                <div class="energy-card gas">
+                    <div class="card-header">
+                        <span class="card-title">Ciclo Combinado (Gas)</span>
+                        <span class="card-value"><span id="gas-val">12</span>%</span>
+                    </div>
+                    <div class="progress-bg"><div class="progress-fill" id="gas-bar" style="width: 12%;"></div></div>
                 </div>
             </div>
-        );
 
-        const SpainEnergyMonitor = () => {
-            const [price, setPrice] = useState(0.145);
-            const mix = { solar: 35, wind: 40, gas: 15 };
+            <div class="map-panel">
+                <span style="position: absolute; top: 20px; left: 20px; font-size: 12px; color: var(--text-muted); font-weight: bold; letter-spacing: 1px;">VISOR TOPOLÓGICO</span>
+                
+                <div class="map-container">
+                    <svg viewBox="0 0 100 100" class="spain-svg">
+                        <path class="spain-path" d="M15,10 L35,8 L65,15 L85,25 L95,45 L90,70 L70,90 L40,95 L25,85 L15,70 L10,50 L5,25 Z" />
+                    </svg>
 
-            useEffect(() => {
-                const interval = setInterval(() => {
-                    setPrice(prev => +(prev + (Math.random() * 0.01 - 0.005)).toFixed(3));
-                }, 3000);
-                return () => clearInterval(interval);
-            }, []);
+                    <div class="node galicia">
+                        <div class="node-pulse"></div>
+                        <div class="node-dot"></div>
+                        <div class="node-label">GALICIA: EXPORTANDO</div>
+                    </div>
 
-            return (
-                <div className="min-h-screen p-4 md:p-8 relative">
-                    <div className="fixed top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px] -z-10"></div>
-                    
-                    <header className="max-w-6xl mx-auto flex justify-between items-center mb-10 border-b border-slate-800 pb-6">
-                        <div>
-                            <h1 className="text-3xl font-black tracking-tighter flex items-center gap-2">
-                                <div className="h-3 w-3 bg-red-500 rounded-full animate-pulse"></div>
-                                RED ELÉCTRICA <span className="text-blue-500 italic">ESP</span>
-                            </h1>
-                            <p className="text-slate-500 text-sm font-mono mt-1">ESTADO: ONLINE | CONEXIÓN SEGURA</p>
-                        </div>
-                        <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-xl">
-                            <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest text-right">Precio Actual</p>
-                            <p className="text-2xl font-mono font-bold text-emerald-400">{price} €/kWh</p>
-                        </div>
-                    </header>
+                    <div class="node madrid">
+                        <div class="node-pulse"></div>
+                        <div class="node-dot"></div>
+                        <div class="node-label">MADRID: 4.2 GW DEMANDA</div>
+                    </div>
 
-                    <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div className="space-y-2">
-                            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2">
-                                <Icons.Zap /> Generación en Tiempo Real
-                            </h2>
-                            <EnergyBar label="Eólica" value={mix.wind} icon={<Icons.Wind/>} color="bg-cyan-500" />
-                            <EnergyBar label="Solar" value={mix.solar} icon={<Icons.Sun/>} color="bg-amber-400" />
-                            <EnergyBar label="Ciclo Combinado" value={mix.gas} icon={<Icons.Flame/>} color="bg-orange-600" />
-                        </div>
-
-                        {/* Visor de Mapa Estilizado */}
-                        <div className="lg:col-span-2 bg-slate-900/30 border border-slate-800 rounded-2xl p-6 relative flex flex-col items-center justify-center min-h-[400px]">
-                            <h3 className="absolute top-6 left-6 text-sm font-bold text-slate-400 uppercase tracking-widest">Nodos de Red Activos</h3>
-                            
-                            {/* Representación gráfica de la Península con Nodos */}
-                            <div className="relative w-full max-w-md aspect-square mt-8">
-                                {/* Silueta muy básica de España en SVG */}
-                                <svg viewBox="0 0 100 100" className="w-full h-full opacity-20" fill="#334155">
-                                    <path d="M20,20 L80,20 L90,80 L40,90 L10,60 Z" />
-                                </svg>
-                                
-                                {/* Nodo Galicia */}
-                                <div className="absolute top-[25%] left-[20%] flex flex-col items-center">
-                                    <div className="relative">
-                                        <div className="w-4 h-4 bg-cyan-400 rounded-full z-10 relative"></div>
-                                        <div className="absolute inset-0 bg-cyan-400 rounded-full radar-pulse"></div>
-                                    </div>
-                                    <span className="text-[10px] font-bold mt-2 text-cyan-400 bg-slate-900 px-2 rounded">GALICIA: +400MW</span>
-                                </div>
-
-                                {/* Nodo Andalucía */}
-                                <div className="absolute bottom-[25%] left-[45%] flex flex-col items-center">
-                                    <div className="relative">
-                                        <div className="w-4 h-4 bg-amber-400 rounded-full z-10 relative"></div>
-                                        <div className="absolute inset-0 bg-amber-400 rounded-full radar-pulse"></div>
-                                    </div>
-                                    <span className="text-[10px] font-bold mt-2 text-amber-400 bg-slate-900 px-2 rounded">ANDALUCÍA: +SOLAR</span>
-                                </div>
-                                
-                                {/* Nodo Madrid */}
-                                <div className="absolute top-[45%] left-[50%] flex flex-col items-center">
-                                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                                    <span className="text-[10px] font-bold mt-1 text-slate-300">MADRID: ALTA DEMANDA</span>
-                                </div>
-                            </div>
-                        </div>
-                    </main>
+                    <div class="node andalucia">
+                        <div class="node-pulse"></div>
+                        <div class="node-dot"></div>
+                        <div class="node-label">ANDALUCÍA: +SOLAR</div>
+                    </div>
                 </div>
-            );
-        };
+            </div>
+        </div>
+    </div>
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<SpainEnergyMonitor />);
+    <script>
+        // Lógica para animar los datos y dar sensación de "Tiempo Real"
+        const priceEl = document.getElementById('price-val');
+        
+        const windVal = document.getElementById('wind-val');
+        const windBar = document.getElementById('wind-bar');
+        
+        const solarVal = document.getElementById('solar-val');
+        const solarBar = document.getElementById('solar-bar');
+        
+        const gasVal = document.getElementById('gas-val');
+        const gasBar = document.getElementById('gas-bar');
+
+        let currentPrice = 0.145;
+        let wind = 42;
+        let solar = 35;
+        let gas = 12;
+
+        setInterval(() => {
+            // Simulamos fluctuación de precio
+            currentPrice = currentPrice + (Math.random() * 0.006 - 0.003);
+            priceEl.innerText = currentPrice.toFixed(3);
+
+            // Simulamos fluctuación de energía (+- 2%)
+            wind = Math.max(0, Math.min(100, wind + (Math.random() * 2 - 1)));
+            solar = Math.max(0, Math.min(100, solar + (Math.random() * 2 - 1)));
+            gas = Math.max(0, Math.min(100, gas + (Math.random() * 2 - 1)));
+
+            windVal.innerText = wind.toFixed(1);
+            windBar.style.width = wind + '%';
+
+            solarVal.innerText = solar.toFixed(1);
+            solarBar.style.width = solar + '%';
+
+            gasVal.innerText = gas.toFixed(1);
+            gasBar.style.width = gas + '%';
+
+        }, 3000); // Se actualiza cada 3 segundos
     </script>
 </body>
 </html>
