@@ -32,7 +32,7 @@
                               radial-gradient(circle at 85% 30%, rgba(245, 158, 11, 0.03) 0%, transparent 50%);
         }
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .container { max-width: 1250px; margin: 0 auto; padding: 40px 20px; }
 
         /* Header */
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
@@ -42,35 +42,37 @@
         .live-dot { display: inline-block; width: 10px; height: 10px; background: var(--accent-red); border-radius: 50%; margin-right: 10px; box-shadow: 0 0 10px var(--accent-red); animation: pulse 1.5s infinite; }
 
         /* Layout Principal */
-        .dashboard { display: grid; grid-template-columns: 3fr 2fr; gap: 20px; }
-        @media (max-width: 800px) { .dashboard { grid-template-columns: 1fr; } }
+        .dashboard { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; }
+        @media (max-width: 900px) { .dashboard { grid-template-columns: 1fr; } }
 
         .panel { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 25px; backdrop-filter: blur(10px); }
         .panel-title { font-size: 12px; font-weight: 800; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
 
         /* Mapa Vectorial */
         .map-container { position: relative; width: 100%; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; }
-        .spain-svg { width: 90%; height: 90%; filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.1)); }
+        .spain-svg { width: 95%; height: 95%; filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.1)); }
         .spain-path { fill: #081121; stroke: #1e3a8a; stroke-width: 2; stroke-linejoin: round; }
         .grid-lines { stroke: rgba(59, 130, 246, 0.05); stroke-width: 1; }
 
         /* Nodos Interactivos */
         .node { position: absolute; display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -50%); cursor: pointer; transition: all 0.2s; }
-        .node:hover { transform: translate(-50%, -50%) scale(1.2); z-index: 10; }
-        .node.active .node-dot { box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2); }
-        .node-dot { width: 14px; height: 14px; border-radius: 50%; position: relative; z-index: 2; border: 2px solid #fff; }
-        .node-pulse { position: absolute; inset: -6px; border-radius: 50%; animation: ping 2s infinite; z-index: 1; }
-        .node-label { margin-top: 8px; font-size: 10px; font-weight: bold; padding: 4px 8px; border-radius: 6px; background: #000; border: 1px solid var(--border-color); white-space: nowrap; font-family: 'JetBrains Mono', monospace; pointer-events: none; }
+        .node:hover { transform: translate(-50%, -50%) scale(1.2); z-index: 20; }
+        .node.active .node-dot { box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3); }
+        .node-dot { width: 12px; height: 12px; border-radius: 50%; position: relative; z-index: 2; border: 2px solid #fff; }
+        .node-pulse { position: absolute; inset: -5px; border-radius: 50%; animation: ping 2s infinite; z-index: 1; }
+        .node-label { margin-top: 6px; font-size: 9px; font-weight: bold; padding: 3px 6px; border-radius: 4px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); white-space: nowrap; font-family: 'JetBrains Mono', monospace; pointer-events: none; opacity: 0; transition: opacity 0.2s;}
+        .node:hover .node-label, .node.active .node-label { opacity: 1; }
 
         /* Colores de estado */
         .node[data-status="export"] .node-dot, .node[data-status="export"] .node-pulse { background: var(--accent-cyan); }
         .node[data-status="solar"] .node-dot, .node[data-status="solar"] .node-pulse { background: var(--accent-yellow); }
         .node[data-status="alert"] .node-dot, .node[data-status="alert"] .node-pulse { background: var(--accent-red); }
         .node[data-status="stable"] .node-dot, .node[data-status="stable"] .node-pulse { background: var(--accent-green); }
+        .node[data-status="nuclear"] .node-dot, .node[data-status="nuclear"] .node-pulse { background: var(--accent-purple); }
 
         /* Panel de Detalles (Derecha) */
         .details-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
-        .region-name { font-size: 24px; font-weight: 800; color: var(--text-main); margin-bottom: 5px; }
+        .region-name { font-size: 22px; font-weight: 800; color: var(--text-main); margin-bottom: 5px; }
         .region-status { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
         
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
@@ -86,9 +88,8 @@
         .bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
 
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+        @keyframes ping { 75%, 100% { transform: scale(2.2); opacity: 0; } }
 
-        /* Instrucción inicial */
         #placeholder-msg { text-align: center; color: var(--text-muted); font-style: italic; margin-top: 50px; }
         #details-content { display: none; }
     </style>
@@ -109,36 +110,68 @@
 
         <div class="dashboard">
             <div class="panel">
-                <div class="panel-title">Visor Topológico (Haz clic en un nodo)</div>
+                <div class="panel-title">Visor Topológico (17 CCAA)</div>
                 <div class="map-container">
                     <svg viewBox="0 0 1000 800" class="spain-svg">
                         <path class="grid-lines" d="M0,200 L1000,200 M0,400 L1000,400 M0,600 L1000,600 M200,0 L200,800 M400,0 L400,800 M600,0 L600,800 M800,0 L800,800" />
                         <path class="spain-path" d="M 120,100 L 250,80 L 400,90 L 550,110 L 700,160 L 880,220 L 860,350 L 800,480 L 700,600 L 550,700 L 400,750 L 350,680 L 380,550 L 320,400 L 280,300 L 220,200 L 150,150 Z" />
                     </svg>
 
-                    <div class="node" data-id="galicia" data-status="export" style="top: 18%; left: 18%;" onclick="loadRegionData('galicia')">
-                        <div class="node-pulse"></div><div class="node-dot"></div>
-                        <div class="node-label">GALICIA</div>
+                    <div class="node" data-id="galicia" data-status="export" style="top: 20%; left: 16%;" onclick="loadRegionData('galicia')">
+                        <div class="node-pulse"></div><div class="node-dot"></div><div class="node-label">Galicia</div>
+                    </div>
+                    <div class="node" data-id="asturias" data-status="stable" style="top: 15%; left: 32%;" onclick="loadRegionData('asturias')">
+                        <div class="node-pulse"></div><div class="node-dot"></div><div class="node-label">Asturias</div>
+                    </div>
+                    <div class="node" data-id="cantabria" data-status="stable" style="top: 16%; left: 45%;" onclick="loadRegionData('cantabria')">
+                        <div class="node-pulse"></div><div class="node-dot"></div><div class="node-label">Cantabria</div>
+                    </div>
+                    <div class="node" data-id="pais_vasco" data-status="alert" style="top: 18%; left: 58%;" onclick="loadRegionData('pais_vasco')">
+                        <div class="node-pulse"></div><div class="node-dot"></div><div class="node-label">País Vasco</div>
                     </div>
                     
-                    <div class="node" data-id="madrid" data-status="alert" style="top: 50%; left: 50%;" onclick="loadRegionData('madrid')">
-                        <div class="node-pulse"></div><div class="node-dot"></div>
-                        <div class="node-label">MADRID</div>
+                    <div class="node" data-id="navarra" data-status="export" style="top: 22%; left: 66%;" onclick="loadRegionData('navarra')">
+                        <div class="node-pulse"></div><div class="node-dot"></div><div class="node-label">Navarra</div>
+                    </div>
+                    <div class="node" data-id="rioja" data-status="stable" style="top: 28%; left: 56%;" onclick="loadRegionData('rioja')">
+                        <div class="node-pulse"></div><div class="node-dot"></div><div class="node-label">La Rioja</div>
+                    </div>
+                    <div class="node" data-id="castilla_leon" data-status="export" style="top: 35%; left: 36%;" onclick="loadRegionData('castilla_leon')">
+                        <div class="node-pulse"></div><div class="node-dot"></div><div class="node-label">Castilla y León</div>
                     </div>
 
-                    <div class="node" data-id="andalucia" data-status="solar" style="top: 75%; left: 48%;" onclick="loadloadRegionData('andalucia')">
-                        <div class="node-pulse"></div><div class="node-dot"></div>
-                        <div class="node-label">ANDALUCÍA</div>
+                    <div class="node" data-id="aragon" data-status="stable" style="top: 38%; left: 68%;" onclick="loadRegionData('aragon')">
+                        <div class="node-pulse"></div><div class="node-dot"></div><div class="node-label">Aragón</div>
+                    </div>
+                    <div class="node" data-id="cataluna" data-status="nuclear" style="top: 32%; left: 85%;" onclick="loadRegionData('cataluna')">
+                        <div class="node-pulse"></div><div class="node-dot"></div><div class="node-label">Cataluña</div>
                     </div>
 
-                    <div class="node" data-id="cataluna" data-status="stable" style="top: 30%; left: 82%;" onclick="loadRegionData('cataluna')">
-                        <div class="node-pulse"></div><div class="node-dot"></div>
-                        <div class="node-label">CATALUÑA</div>
+                    <div class="node" data-id="madrid" data-status="alert" style="top: 50%; left: 48%;" onclick="loadRegionData('madrid')">
+                        <div class="node-pulse"></div><div class="node-dot"></div><div class="node-label">Madrid</div>
                     </div>
-                    
-                    <div class="node" data-id="aragon" data-status="stable" style="top: 35%; left: 65%;" onclick="loadRegionData('aragon')">
-                        <div class="node-pulse"></div><div class="node-dot"></div>
-                        <div class="node-label">ARAGÓN</div>
+                    <div class="node" data-id="castilla_mancha" data-status="solar" style="top: 60%; left: 54%;" onclick="loadRegionData('castilla_mancha')">
+                        <div class="node-pulse"></div><div class="node-dot"></div><div class="node-label">Castilla-La Mancha</div>
+                    </div>
+                    <div class="node" data-id="extremadura" data-status="nuclear" style="top: 62%; left: 30%;" onclick="loadRegionData('extremadura')">
+                        <div class="node-pulse"></div><div class="node-dot"></div><div class="node-label">Extremadura</div>
+                    </div>
+
+                    <div class="node" data-id="valencia" data-status="nuclear" style="top: 55%; left: 78%;" onclick="loadRegionData('valencia')">
+                        <div class="node-pulse"></div><div class="node-dot"></div><div class="node-label">C. Valenciana</div>
+                    </div>
+                    <div class="node" data-id="murcia" data-status="solar" style="top: 72%; left: 70%;" onclick="loadRegionData('murcia')">
+                        <div class="node-pulse"></div><div class="node-dot"></div><div class="node-label">Región de Murcia</div>
+                    </div>
+                    <div class="node" data-id="andalucia" data-status="solar" style="top: 78%; left: 45%;" onclick="loadRegionData('andalucia')">
+                        <div class="node-pulse"></div><div class="node-dot"></div><div class="node-label">Andalucía</div>
+                    </div>
+
+                    <div class="node" data-id="baleares" data-status="stable" style="top: 50%; left: 95%;" onclick="loadRegionData('baleares')">
+                        <div class="node-pulse"></div><div class="node-dot"></div><div class="node-label">Baleares</div>
+                    </div>
+                    <div class="node" data-id="canarias" data-status="alert" style="top: 85%; left: 15%;" onclick="loadRegionData('canarias')">
+                        <div class="node-pulse"></div><div class="node-dot"></div><div class="node-label">Canarias</div>
                     </div>
                 </div>
             </div>
@@ -148,7 +181,7 @@
                 
                 <div id="placeholder-msg">
                     <svg style="width: 48px; height: 48px; margin: 0 auto 10px auto; color: #334155;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
-                    Selecciona una Comunidad Autónoma en el mapa para ver su desglose en tiempo real.
+                    Selecciona una Comunidad Autónoma en el mapa para ver su desglose.
                 </div>
 
                 <div id="details-content">
@@ -193,7 +226,7 @@
                             <div class="bar-bg"><div class="bar-fill" id="mix-base-bar" style="background: var(--accent-green); width: 0%;"></div></div>
                         </div>
                         <div class="mix-row">
-                            <div class="mix-labels"><span style="color: var(--accent-red);">Gas (Ciclo Comb.)</span> <span id="mix-gas-val">--%</span></div>
+                            <div class="mix-labels"><span style="color: var(--accent-red);">Gas/Otros</span> <span id="mix-gas-val">--%</span></div>
                             <div class="bar-bg"><div class="bar-fill" id="mix-gas-bar" style="background: var(--accent-red); width: 0%;"></div></div>
                         </div>
                     </div>
@@ -203,59 +236,45 @@
     </div>
 
     <script>
-        // Base de datos simulada para cada comunidad
+        // Base de datos simulada completa (17 CCAA)
         const regionDB = {
-            'galicia': {
-                name: 'Galicia', status: 'EXPORTANDO', statusColor: 'var(--accent-cyan)',
-                gen: '3,450', dem: '1,820', bal: '+1,630 MW', co2: '45',
-                mix: { wind: 65, solar: 5, base: 25, gas: 5 }
-            },
-            'madrid': {
-                name: 'Comunidad de Madrid', status: 'ALTA DEMANDA', statusColor: 'var(--accent-red)',
-                gen: '850', dem: '4,200', bal: '-3,350 MW', co2: '120',
-                mix: { wind: 5, solar: 15, base: 10, gas: 70 }
-            },
-            'andalucia': {
-                name: 'Andalucía', status: 'INYECCIÓN SOLAR', statusColor: 'var(--accent-yellow)',
-                gen: '5,100', dem: '3,900', bal: '+1,200 MW', co2: '60',
-                mix: { wind: 20, solar: 55, base: 10, gas: 15 }
-            },
-            'cataluna': {
-                name: 'Cataluña', status: 'BASE NUCLEAR', statusColor: 'var(--accent-green)',
-                gen: '4,800', dem: '4,500', bal: '+300 MW', co2: '30',
-                mix: { wind: 10, solar: 15, base: 60, gas: 15 }
-            },
-            'aragon': {
-                name: 'Aragón', status: 'MIX ÓPTIMO', statusColor: 'var(--accent-green)',
-                gen: '2,900', dem: '1,100', bal: '+1,800 MW', co2: '40',
-                mix: { wind: 45, solar: 30, base: 20, gas: 5 }
-            }
+            'galicia': { name: 'Galicia', status: 'EXPORTANDO', statusColor: 'var(--accent-cyan)', gen: '3,450', dem: '1,820', bal: '+1,630 MW', co2: '45', mix: { wind: 65, solar: 5, base: 25, gas: 5 } },
+            'asturias': { name: 'Asturias', status: 'MIX ESTABLE', statusColor: 'var(--accent-green)', gen: '1,200', dem: '950', bal: '+250 MW', co2: '210', mix: { wind: 25, solar: 2, base: 15, gas: 58 } },
+            'cantabria': { name: 'Cantabria', status: 'EQUILIBRADO', statusColor: 'var(--accent-green)', gen: '450', dem: '420', bal: '+30 MW', co2: '90', mix: { wind: 30, solar: 5, base: 45, gas: 20 } },
+            'pais_vasco': { name: 'País Vasco', status: 'ALTA DEMANDA IND.', statusColor: 'var(--accent-red)', gen: '1,100', dem: '2,800', bal: '-1,700 MW', co2: '140', mix: { wind: 15, solar: 5, base: 10, gas: 70 } },
+            'navarra': { name: 'Navarra', status: 'PICO EÓLICO', statusColor: 'var(--accent-cyan)', gen: '1,300', dem: '600', bal: '+700 MW', co2: '25', mix: { wind: 75, solar: 15, base: 5, gas: 5 } },
+            'rioja': { name: 'La Rioja', status: 'OPERACIONAL', statusColor: 'var(--accent-green)', gen: '350', dem: '280', bal: '+70 MW', co2: '50', mix: { wind: 40, solar: 20, base: 15, gas: 25 } },
+            'castilla_leon': { name: 'Castilla y León', status: 'GRAN EXPORTADOR', statusColor: 'var(--accent-cyan)', gen: '5,800', dem: '1,500', bal: '+4,300 MW', co2: '15', mix: { wind: 60, solar: 15, base: 20, gas: 5 } },
+            'aragon': { name: 'Aragón', status: 'MIX ÓPTIMO', statusColor: 'var(--accent-green)', gen: '3,100', dem: '1,200', bal: '+1,900 MW', co2: '35', mix: { wind: 45, solar: 30, base: 20, gas: 5 } },
+            'cataluna': { name: 'Cataluña', status: 'BASE NUCLEAR', statusColor: 'var(--accent-purple)', gen: '5,200', dem: '4,800', bal: '+400 MW', co2: '30', mix: { wind: 10, solar: 12, base: 65, gas: 13 } },
+            'madrid': { name: 'Comunidad de Madrid', status: 'ALTA DEMANDA', statusColor: 'var(--accent-red)', gen: '850', dem: '4,200', bal: '-3,350 MW', co2: '120', mix: { wind: 5, solar: 15, base: 10, gas: 70 } },
+            'castilla_mancha': { name: 'Castilla-La Mancha', status: 'ALTA INYECCIÓN', statusColor: 'var(--accent-yellow)', gen: '4,100', dem: '1,300', bal: '+2,800 MW', co2: '20', mix: { wind: 40, solar: 50, base: 5, gas: 5 } },
+            'extremadura': { name: 'Extremadura', status: 'NUCLEAR + SOLAR', statusColor: 'var(--accent-purple)', gen: '3,800', dem: '800', bal: '+3,000 MW', co2: '10', mix: { wind: 5, solar: 35, base: 55, gas: 5 } },
+            'valencia': { name: 'C. Valenciana', status: 'BASE NUCLEAR', statusColor: 'var(--accent-purple)', gen: '3,900', dem: '3,500', bal: '+400 MW', co2: '45', mix: { wind: 10, solar: 20, base: 50, gas: 20 } },
+            'murcia': { name: 'Región de Murcia', status: 'PICO SOLAR', statusColor: 'var(--accent-yellow)', gen: '1,200', dem: '900', bal: '+300 MW', co2: '80', mix: { wind: 10, solar: 45, base: 5, gas: 40 } },
+            'andalucia': { name: 'Andalucía', status: 'INYECCIÓN SOLAR', statusColor: 'var(--accent-yellow)', gen: '5,100', dem: '3,900', bal: '+1,200 MW', co2: '60', mix: { wind: 20, solar: 55, base: 10, gas: 15 } },
+            'baleares': { name: 'Baleares', status: 'CABLE PENÍNSULA', statusColor: 'var(--accent-green)', gen: '500', dem: '850', bal: '-350 MW', co2: '160', mix: { wind: 5, solar: 20, base: 0, gas: 75 } },
+            'canarias': { name: 'Canarias', status: 'SISTEMA AISLADO', statusColor: 'var(--accent-red)', gen: '1,100', dem: '1,100', bal: '0 MW', co2: '280', mix: { wind: 25, solar: 10, base: 0, gas: 65 } }
         };
 
-        // Función que se ejecuta al hacer clic en el mapa
         window.loadRegionData = function(id) {
-            // Ocultar mensaje inicial y mostrar datos
             document.getElementById('placeholder-msg').style.display = 'none';
             document.getElementById('details-content').style.display = 'block';
 
-            // Resaltar el nodo activo en el mapa
             document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
             document.querySelector(`.node[data-id="${id}"]`).classList.add('active');
 
-            // Obtener datos
             const data = regionDB[id];
 
-            // Actualizar textos
             document.getElementById('r-name').innerText = data.name;
             document.getElementById('r-status').innerText = data.status;
             document.getElementById('r-status').style.background = data.statusColor;
             document.getElementById('r-gen').innerText = data.gen + ' MW';
             document.getElementById('r-dem').innerText = data.dem + ' MW';
             document.getElementById('r-bal').innerText = data.bal;
-            document.getElementById('r-bal').style.color = data.bal.startsWith('+') ? 'var(--accent-green)' : 'var(--accent-red)';
+            document.getElementById('r-bal').style.color = data.bal.startsWith('+') ? 'var(--accent-green)' : (data.bal.startsWith('-') ? 'var(--accent-red)' : 'var(--text-muted)');
             document.getElementById('r-co2').innerText = data.co2 + ' g/kWh';
 
-            // Animar las barras de progreso
             setTimeout(() => {
                 document.getElementById('mix-wind-val').innerText = data.mix.wind + '%';
                 document.getElementById('mix-wind-bar').style.width = data.mix.wind + '%';
@@ -268,7 +287,7 @@
 
                 document.getElementById('mix-gas-val').innerText = data.mix.gas + '%';
                 document.getElementById('mix-gas-bar').style.width = data.mix.gas + '%';
-            }, 50); // Pequeño retraso para que la animación CSS se active
+            }, 50);
         };
     </script>
 </body>
