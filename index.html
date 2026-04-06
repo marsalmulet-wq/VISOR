@@ -18,6 +18,7 @@
             --accent-yellow: #f59e0b;
             --accent-cyan: #06b6d4;
             --accent-red: #ef4444;
+            --accent-purple: #8b5cf6;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -27,11 +28,11 @@
             color: var(--text-main);
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
-            background-image: radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
-                              radial-gradient(circle at 85% 30%, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
+            background-image: radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+                              radial-gradient(circle at 85% 30%, rgba(245, 158, 11, 0.03) 0%, transparent 50%);
         }
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
 
         /* Header */
         header {
@@ -55,12 +56,8 @@
         }
 
         .price-box {
-            background: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            padding: 15px 25px;
-            border-radius: 12px;
-            text-align: right;
-            backdrop-filter: blur(10px);
+            background: var(--panel-bg); border: 1px solid var(--border-color);
+            padding: 15px 25px; border-radius: 12px; text-align: right; backdrop-filter: blur(10px);
         }
 
         .price-box p { font-size: 10px; text-transform: uppercase; color: var(--text-muted); font-weight: bold; letter-spacing: 1px; }
@@ -68,16 +65,11 @@
 
         /* Grid Principal */
         .main-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; }
-        @media (max-width: 768px) { .main-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
 
         /* Barras de Energía */
         .energy-panel { display: flex; flex-direction: column; gap: 15px; }
-        .energy-card {
-            background: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            border-radius: 16px;
-        }
+        .energy-card { background: var(--panel-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 16px; }
         
         .card-header { display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center;}
         .card-title { font-size: 14px; font-weight: bold; }
@@ -88,49 +80,68 @@
 
         .wind .progress-fill { background: var(--accent-cyan); box-shadow: 0 0 15px var(--accent-cyan); }
         .wind .card-value { color: var(--accent-cyan); }
-        
         .solar .progress-fill { background: var(--accent-yellow); box-shadow: 0 0 15px var(--accent-yellow); }
         .solar .card-value { color: var(--accent-yellow); }
-        
         .gas .progress-fill { background: var(--accent-red); box-shadow: 0 0 15px var(--accent-red); }
         .gas .card-value { color: var(--accent-red); }
 
-        /* Mapa de España Vectorial (Hecho a mano en SVG para no usar archivos externos) */
+        /* Mapa de España Vectorial Mejorado */
         .map-panel {
             background: var(--panel-bg);
             border: 1px solid var(--border-color);
             border-radius: 24px;
+            position: relative;
+            min-height: 550px;
+            padding: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            min-height: 400px;
-            padding: 20px;
         }
 
-        .map-container { position: relative; width: 100%; max-width: 500px; }
+        .map-title { position: absolute; top: 20px; left: 20px; font-size: 12px; color: var(--text-muted); font-weight: bold; letter-spacing: 1px; }
+
+        .map-container { position: relative; width: 100%; max-width: 600px; aspect-ratio: 4/3; }
         
-        .spain-svg { width: 100%; height: auto; filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.1)); }
-        .spain-path { fill: #0f172a; stroke: #334155; stroke-width: 2; transition: all 0.3s; }
-        .spain-path:hover { fill: rgba(59, 130, 246, 0.2); stroke: var(--accent-blue); }
+        /* Silueta más realista de la Península (Estilo Radar) */
+        .spain-svg { width: 100%; height: 100%; filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.15)); }
+        .spain-path { 
+            fill: #081121; 
+            stroke: #1e3a8a; 
+            stroke-width: 3; 
+            stroke-linejoin: round;
+        }
+        .grid-lines { stroke: rgba(59, 130, 246, 0.1); stroke-width: 1; }
 
-        /* Nodos en el mapa */
-        .node { position: absolute; display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -50%); }
-        .node-dot { width: 12px; height: 12px; border-radius: 50%; position: relative; z-index: 2; }
-        .node-pulse { position: absolute; inset: -5px; border-radius: 50%; animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; z-index: 1; }
-        .node-label { margin-top: 8px; font-size: 10px; font-weight: bold; padding: 4px 8px; border-radius: 4px; background: rgba(0,0,0,0.8); border: 1px solid var(--border-color); white-space: nowrap;}
+        /* Nodos de Comunidades */
+        .node { position: absolute; display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -50%); transition: all 0.3s; cursor: crosshair; }
+        .node:hover { z-index: 10; transform: translate(-50%, -50%) scale(1.1); }
+        
+        .node-dot { width: 10px; height: 10px; border-radius: 50%; position: relative; z-index: 2; }
+        .node-pulse { position: absolute; inset: -4px; border-radius: 50%; animation: ping 2s infinite; z-index: 1; }
+        
+        .node-label { 
+            margin-top: 6px; font-size: 9px; font-weight: bold; padding: 4px 8px; 
+            border-radius: 4px; background: rgba(5, 7, 10, 0.9); border: 1px solid var(--border-color); 
+            white-space: nowrap; font-family: 'JetBrains Mono', monospace;
+            opacity: 0.8; transition: opacity 0.3s;
+        }
+        .node:hover .node-label { opacity: 1; border-color: var(--accent-blue); box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
 
-        .node.galicia { top: 20%; left: 15%; }
-        .node.galicia .node-dot, .node.galicia .node-pulse { background: var(--accent-cyan); }
-        .node.galicia .node-label { color: var(--accent-cyan); }
+        /* Colores por estado */
+        .status-export .node-dot, .status-export .node-pulse { background: var(--accent-cyan); }
+        .status-export .node-label { color: var(--accent-cyan); }
+        
+        .status-solar .node-dot, .status-solar .node-pulse { background: var(--accent-yellow); }
+        .status-solar .node-label { color: var(--accent-yellow); }
+        
+        .status-alert .node-dot, .status-alert .node-pulse { background: var(--accent-red); }
+        .status-alert .node-label { color: var(--accent-red); }
 
-        .node.andalucia { top: 80%; left: 45%; }
-        .node.andalucia .node-dot, .node.andalucia .node-pulse { background: var(--accent-yellow); }
-        .node.andalucia .node-label { color: var(--accent-yellow); }
+        .status-stable .node-dot, .status-stable .node-pulse { background: var(--accent-green); }
+        .status-stable .node-label { color: var(--accent-green); }
 
-        .node.madrid { top: 50%; left: 48%; }
-        .node.madrid .node-dot, .node.madrid .node-pulse { background: var(--accent-red); }
-        .node.madrid .node-label { color: var(--accent-red); }
+        .status-nuclear .node-dot, .status-nuclear .node-pulse { background: var(--accent-purple); }
+        .status-nuclear .node-label { color: var(--accent-purple); }
 
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         @keyframes ping { 75%, 100% { transform: scale(2.5); opacity: 0; } }
@@ -142,109 +153,125 @@
         <header>
             <div class="title-group">
                 <h1><span class="live-dot"></span>RED ELÉCTRICA <span>ESP</span></h1>
-                <p class="subtitle">SISTEMA_NACIONAL // DATOS_TIEMPO_REAL</p>
+                <p class="subtitle">SISTEMA_NACIONAL // MONITORIZACIÓN TOPOLÓGICA ACTIVA</p>
             </div>
             <div class="price-box">
-                <p>Precio Actual PVPC</p>
-                <div class="price-value"><span id="price-val">0.145</span> €/kWh</div>
+                <p>Precio Mercado Libre</p>
+                <div class="price-value"><span id="price-val">0.153</span> €/kWh</div>
             </div>
         </header>
 
         <div class="main-grid">
             <div class="energy-panel">
                 <div class="energy-card wind">
-                    <div class="card-header">
-                        <span class="card-title">Eólica</span>
-                        <span class="card-value"><span id="wind-val">42</span>%</span>
-                    </div>
-                    <div class="progress-bg"><div class="progress-fill" id="wind-bar" style="width: 42%;"></div></div>
+                    <div class="card-header"><span class="card-title">Eólica Flotante & Terrestre</span><span class="card-value"><span id="wind-val">43.0</span>%</span></div>
+                    <div class="progress-bg"><div class="progress-fill" id="wind-bar" style="width: 43%;"></div></div>
                 </div>
-
                 <div class="energy-card solar">
-                    <div class="card-header">
-                        <span class="card-title">Solar Fotovoltaica</span>
-                        <span class="card-value"><span id="solar-val">35</span>%</span>
-                    </div>
-                    <div class="progress-bg"><div class="progress-fill" id="solar-bar" style="width: 35%;"></div></div>
+                    <div class="card-header"><span class="card-title">Solar Fotovoltaica</span><span class="card-value"><span id="solar-val">36.3</span>%</span></div>
+                    <div class="progress-bg"><div class="progress-fill" id="solar-bar" style="width: 36.3%;"></div></div>
                 </div>
-
                 <div class="energy-card gas">
-                    <div class="card-header">
-                        <span class="card-title">Ciclo Combinado (Gas)</span>
-                        <span class="card-value"><span id="gas-val">12</span>%</span>
-                    </div>
-                    <div class="progress-bg"><div class="progress-fill" id="gas-bar" style="width: 12%;"></div></div>
+                    <div class="card-header"><span class="card-title">Ciclo Combinado (Gas)</span><span class="card-value"><span id="gas-val">14.3</span>%</span></div>
+                    <div class="progress-bg"><div class="progress-fill" id="gas-bar" style="width: 14.3%;"></div></div>
                 </div>
             </div>
 
             <div class="map-panel">
-                <span style="position: absolute; top: 20px; left: 20px; font-size: 12px; color: var(--text-muted); font-weight: bold; letter-spacing: 1px;">VISOR TOPOLÓGICO</span>
+                <span class="map-title">VISOR DE NODOS AUTONÓMICOS</span>
                 
                 <div class="map-container">
-                    <svg viewBox="0 0 100 100" class="spain-svg">
-                        <path class="spain-path" d="M15,10 L35,8 L65,15 L85,25 L95,45 L90,70 L70,90 L40,95 L25,85 L15,70 L10,50 L5,25 Z" />
+                    <svg viewBox="0 0 1000 800" class="spain-svg">
+                        <path class="grid-lines" d="M0,200 L1000,200 M0,400 L1000,400 M0,600 L1000,600 M200,0 L200,800 M400,0 L400,800 M600,0 L600,800 M800,0 L800,800" />
+                        
+                        <path class="spain-path" d="M 120,100 L 250,80 L 400,90 L 550,110 L 700,160 L 880,220 L 860,350 L 800,480 L 700,600 L 550,700 L 400,750 L 350,680 L 380,550 L 320,400 L 280,300 L 220,200 L 150,150 Z" />
                     </svg>
 
-                    <div class="node galicia">
-                        <div class="node-pulse"></div>
-                        <div class="node-dot"></div>
-                        <div class="node-label">GALICIA: EXPORTANDO</div>
+                    <div class="node status-export" style="top: 18%; left: 18%;">
+                        <div class="node-pulse"></div><div class="node-dot"></div>
+                        <div class="node-label">GALICIA<br>EÓLICA: +850MW</div>
+                    </div>
+                    
+                    <div class="node status-stable" style="top: 15%; left: 35%;">
+                        <div class="node-pulse"></div><div class="node-dot"></div>
+                        <div class="node-label">ASTURIAS<br>ESTABLE</div>
                     </div>
 
-                    <div class="node madrid">
-                        <div class="node-pulse"></div>
-                        <div class="node-dot"></div>
-                        <div class="node-label">MADRID: 4.2 GW DEMANDA</div>
+                    <div class="node status-export" style="top: 17%; left: 55%;">
+                        <div class="node-pulse"></div><div class="node-dot"></div>
+                        <div class="node-label">PAÍS VASCO<br>RED ÓPTIMA</div>
                     </div>
 
-                    <div class="node andalucia">
-                        <div class="node-pulse"></div>
-                        <div class="node-dot"></div>
-                        <div class="node-label">ANDALUCÍA: +SOLAR</div>
+                    <div class="node status-nuclear" style="top: 30%; left: 82%;">
+                        <div class="node-pulse"></div><div class="node-dot"></div>
+                        <div class="node-label">CATALUÑA<br>NUCLEAR BASE</div>
                     </div>
+
+                    <div class="node status-stable" style="top: 35%; left: 65%;">
+                        <div class="node-pulse"></div><div class="node-dot"></div>
+                        <div class="node-label">ARAGÓN<br>MIX EQUILIBRADO</div>
+                    </div>
+
+                    <div class="node status-stable" style="top: 35%; left: 40%;">
+                        <div class="node-pulse"></div><div class="node-dot"></div>
+                        <div class="node-label">CASTILLA Y LEÓN<br>RESERVA HIDRO</div>
+                    </div>
+
+                    <div class="node status-alert" style="top: 50%; left: 50%;">
+                        <div class="node-pulse"></div><div class="node-dot"></div>
+                        <div class="node-label">MADRID<br>ALTA DEMANDA (4.2GW)</div>
+                    </div>
+
+                    <div class="node status-solar" style="top: 60%; left: 35%;">
+                        <div class="node-pulse"></div><div class="node-dot"></div>
+                        <div class="node-label">EXTREMADURA<br>PICO SOLAR</div>
+                    </div>
+
+                    <div class="node status-stable" style="top: 55%; left: 75%;">
+                        <div class="node-pulse"></div><div class="node-dot"></div>
+                        <div class="node-label">C. VALENCIANA<br>OPERACIONAL</div>
+                    </div>
+
+                    <div class="node status-solar" style="top: 75%; left: 48%;">
+                        <div class="node-pulse"></div><div class="node-dot"></div>
+                        <div class="node-label">ANDALUCÍA<br>INYECCIÓN FOTOVOLTAICA</div>
+                    </div>
+
+                    <div class="node status-stable" style="top: 50%; left: 95%;">
+                        <div class="node-pulse"></div><div class="node-dot"></div>
+                        <div class="node-label">BALEARES<br>ENLACE PENÍNSULA</div>
+                    </div>
+                    
+                    <div class="node status-export" style="top: 85%; left: 15%;">
+                        <div class="node-pulse"></div><div class="node-dot"></div>
+                        <div class="node-label">CANARIAS<br>EÓLICA MARINA</div>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Lógica para animar los datos y dar sensación de "Tiempo Real"
         const priceEl = document.getElementById('price-val');
-        
-        const windVal = document.getElementById('wind-val');
-        const windBar = document.getElementById('wind-bar');
-        
-        const solarVal = document.getElementById('solar-val');
-        const solarBar = document.getElementById('solar-bar');
-        
-        const gasVal = document.getElementById('gas-val');
-        const gasBar = document.getElementById('gas-bar');
+        const windVal = document.getElementById('wind-val'); const windBar = document.getElementById('wind-bar');
+        const solarVal = document.getElementById('solar-val'); const solarBar = document.getElementById('solar-bar');
+        const gasVal = document.getElementById('gas-val'); const gasBar = document.getElementById('gas-bar');
 
-        let currentPrice = 0.145;
-        let wind = 42;
-        let solar = 35;
-        let gas = 12;
+        let currentPrice = 0.153; let wind = 43.0; let solar = 36.3; let gas = 14.3;
 
         setInterval(() => {
-            // Simulamos fluctuación de precio
-            currentPrice = currentPrice + (Math.random() * 0.006 - 0.003);
+            currentPrice = currentPrice + (Math.random() * 0.004 - 0.002);
             priceEl.innerText = currentPrice.toFixed(3);
 
-            // Simulamos fluctuación de energía (+- 2%)
-            wind = Math.max(0, Math.min(100, wind + (Math.random() * 2 - 1)));
-            solar = Math.max(0, Math.min(100, solar + (Math.random() * 2 - 1)));
-            gas = Math.max(0, Math.min(100, gas + (Math.random() * 2 - 1)));
+            wind = Math.max(0, Math.min(100, wind + (Math.random() * 1 - 0.5)));
+            solar = Math.max(0, Math.min(100, solar + (Math.random() * 1 - 0.5)));
+            gas = Math.max(0, Math.min(100, gas + (Math.random() * 1 - 0.5)));
 
-            windVal.innerText = wind.toFixed(1);
-            windBar.style.width = wind + '%';
-
-            solarVal.innerText = solar.toFixed(1);
-            solarBar.style.width = solar + '%';
-
-            gasVal.innerText = gas.toFixed(1);
-            gasBar.style.width = gas + '%';
-
-        }, 3000); // Se actualiza cada 3 segundos
+            windVal.innerText = wind.toFixed(1); windBar.style.width = wind + '%';
+            solarVal.innerText = solar.toFixed(1); solarBar.style.width = solar + '%';
+            gasVal.innerText = gas.toFixed(1); gasBar.style.width = gas + '%';
+        }, 2500); 
     </script>
 </body>
 </html>
