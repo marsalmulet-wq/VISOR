@@ -1,134 +1,109 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Zap, Leaf, Droplets, Wind, AlertTriangle } from 'lucide-react';
+import { Sun, Wind, Flame, Zap, TrendingDown, Map as MapIcon } from 'lucide-react';
 
-const GlobalPulse = () => {
-  const [selectedCountry, setSelectedCountry] = useState(null);
-  const [stats, setStats] = useState({
-    renewables: 42,
-    carbonIntensity: 180,
-    globalDemand: "24.5 TW"
-  });
+const SpainEnergyMonitor = () => {
+  const [price, setPrice] = useState(0.145); // Precio simulado €/kWh
+  const [mix, setMix] = useState({ solar: 35, wind: 40, gas: 15, nuclear: 10 });
 
-  // Efecto visual para simular datos en tiempo real
+  // Simulación de actualización de datos
   useEffect(() => {
     const interval = setInterval(() => {
-      setStats(prev => ({
-        ...prev,
-        renewables: +(prev.renewables + (Math.random() * 0.1 - 0.05)).toFixed(2)
-      }));
-    }, 3000);
+      setPrice(prev => +(prev + (Math.random() * 0.01 - 0.005)).toFixed(3));
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-6 overflow-hidden">
-      {/* Header Estilizado */}
-      <header className="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
-        <div className="flex items-center gap-3">
-          <div className="bg-emerald-500/20 p-2 rounded-lg border border-emerald-500/50">
-            <Globe className="text-emerald-400 animate-spin-slow" size={28} />
+    <div className="min-h-screen bg-[#05070a] text-slate-200 font-sans p-4 md:p-8">
+      {/* Glows de fondo decorativos */}
+      <div className="fixed top-0 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px] -z-10"></div>
+      <div className="fixed bottom-0 right-1/4 w-96 h-96 bg-amber-600/10 rounded-full blur-[120px] -z-10"></div>
+
+      <header className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+            </span>
+            <h1 className="text-3xl font-black tracking-tighter">RED ELÉCTRICA <span className="text-blue-500 italic">ESP</span></h1>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">GLOBAL <span className="text-emerald-400">PULSE</span></h1>
-            <p className="text-xs text-slate-500 uppercase tracking-widest">Energy Resilience Monitor • Live</p>
-          </div>
+          <p className="text-slate-500 text-sm font-mono">LIVE_DATA_STREAM: RED_SISTEMA_NACIONAL</p>
         </div>
-        <div className="flex gap-4">
-          <StatCard icon={<Zap size={16}/>} label="Global Load" value={stats.globalDemand} color="text-amber-400" />
-          <StatCard icon={<Leaf size={16}/>} label="Renewables" value={`${stats.renewables}%`} color="text-emerald-400" />
+
+        <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800 p-4 rounded-2xl flex items-center gap-6">
+          <div className="text-right">
+            <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Precio Actual PVPC</p>
+            <p className="text-2xl font-mono font-bold text-emerald-400">{price} €<span className="text-xs">/kWh</span></p>
+          </div>
+          <TrendingDown className="text-emerald-400 animate-bounce" size={24} />
         </div>
       </header>
 
-      <main className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Panel Izquierdo: Datos */}
-        <section className="lg:col-span-1 space-y-6">
-          <div className="bg-slate-900/50 border border-slate-800 p-5 rounded-2xl backdrop-blur-md">
-            <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-              <AlertTriangle size={16} className="text-rose-500" /> 
-              Active Grid Alerts
-            </h3>
-            <div className="space-y-3">
-              <AlertItem country="Germany" status="High Wind Surplus" type="success" />
-              <AlertItem country="Texas, USA" status="Grid Peak Demand" type="warning" />
-              <AlertItem country="Norway" status="Hydro Export Max" type="info" />
-            </div>
-          </div>
+      <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Columna Izquierda: Mix de Generación */}
+        <div className="space-y-4">
+          <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+            <Zap size={16} /> Mix Energético Actual
+          </h2>
+          <EnergyBar label="Eólica" value={mix.wind} icon={<Wind size={18}/>} color="bg-cyan-500" shadow="shadow-cyan-500/40" />
+          <EnergyBar label="Solar Fotovoltaica" value={mix.solar} icon={<Sun size={18}/>} color="bg-amber-400" shadow="shadow-amber-400/40" />
+          <EnergyBar label="Ciclo Combinado (Gas)" value={mix.gas} icon={<Flame size={18}/>} color="bg-orange-600" shadow="shadow-orange-600/40" />
+        </div>
 
-          <div className="bg-gradient-to-br from-emerald-900/20 to-slate-900 border border-emerald-500/30 p-5 rounded-2xl">
-            <h3 className="text-sm font-semibold mb-2">Insight del Momento</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              La intensidad de carbono global ha bajado un 2% en las últimas 24h debido a condiciones óptimas en el Mar del Norte.
+        {/* Columna Central: Mapa Visual */}
+        <div className="lg:col-span-2 relative flex items-center justify-center bg-slate-900/20 border border-slate-800/50 rounded-[2rem] p-8 min-h-[450px]">
+          {/* Placeholder del Mapa de España */}
+          <div className="absolute inset-0 opacity-20 flex items-center justify-center overflow-hidden pointer-events-none">
+             <MapIcon size={400} strokeWidth={0.5} className="text-slate-700" />
+          </div>
+          
+          <div className="relative z-10 text-center">
+            <div className="mb-6 inline-block p-3 bg-blue-500/10 border border-blue-500/20 rounded-full">
+              <MapIcon className="text-blue-400" size={32} />
+            </div>
+            <h3 className="text-xl font-bold mb-2">Interactivo de CCAA</h3>
+            <p className="text-slate-400 max-w-xs mx-auto text-sm leading-relaxed">
+              Haz clic en una comunidad para ver la exportación de energía y potencia instalada.
             </p>
-          </div>
-        </section>
-
-        {/* Centro: El Mapa (Placeholder visual estilizado) */}
-        <section className="lg:col-span-2 relative group">
-          <div className="absolute inset-0 bg-emerald-500/5 rounded-full blur-3xl group-hover:bg-emerald-500/10 transition-all duration-700"></div>
-          <div className="relative bg-slate-900/40 border border-slate-800 rounded-3xl h-[500px] flex items-center justify-center overflow-hidden">
-            {/* Aquí iría el componente de Simple Maps, usamos un visual representativo */}
-            <div className="text-center">
-              <div className="text-9xl opacity-10 font-black select-none">WORLD</div>
-              <p className="text-slate-500 text-sm italic">Interactive SVG Map Engine Loading...</p>
-            </div>
-            
-            {/* Overlay de información flotante */}
-            <div className="absolute bottom-6 right-6 p-4 bg-slate-950/80 border border-slate-700 rounded-xl backdrop-blur-xl animate-bounce-slow">
-              <p className="text-[10px] text-slate-500 uppercase tracking-tighter">Current Node</p>
-              <p className="font-mono text-emerald-400">0x44.23.11.09</p>
+            <div className="mt-8 flex gap-3 justify-center">
+               <span className="px-3 py-1 bg-slate-800 rounded-full text-[10px] border border-slate-700 font-bold">GALICIA: +400MW</span>
+               <span className="px-3 py-1 bg-slate-800 rounded-full text-[10px] border border-slate-700 font-bold">ARAGÓN: +120MW</span>
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* Panel Derecho: Detalles de Selección */}
-        <section className="lg:col-span-1 bg-slate-900/50 border border-slate-800 p-6 rounded-2xl backdrop-blur-md">
-          <h3 className="text-lg font-medium mb-6">Regional Breakdown</h3>
-          <div className="space-y-6">
-            <ProgressCircle label="Solar PV" value={65} icon={<Wind size={14}/>} />
-            <ProgressCircle label="Wind Offshore" value={30} icon={<Droplets size={14}/>} />
-            <ProgressCircle label="Nuclear" value={5} icon={<Zap size={14}/>} />
-          </div>
-        </section>
       </main>
+
+      {/* Footer Info */}
+      <footer className="max-w-6xl mx-auto mt-12 pt-6 border-t border-slate-900 flex justify-between text-[10px] text-slate-600 uppercase font-mono tracking-[0.2em]">
+        <span>Sistema de Monitorización Peninsular</span>
+        <span>Datos: REE API v2.0</span>
+        <span>Estado: Operacional</span>
+      </footer>
     </div>
   );
 };
 
-/* Sub-componentes para limpieza de código */
-const StatCard = ({ icon, label, value, color }) => (
-  <div className="bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl flex items-center gap-3">
-    <span className={color}>{icon}</span>
-    <div>
-      <p className="text-[10px] text-slate-500 uppercase leading-none">{label}</p>
-      <p className={`text-sm font-bold ${color}`}>{value}</p>
+const EnergyBar = ({ label, value, icon, color, shadow }) => (
+  <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800 hover:border-slate-700 transition-all group">
+    <div className="flex justify-between items-center mb-3">
+      <div className="flex items-center gap-3">
+        <div className={`p-2 rounded-lg ${color} bg-opacity-10 text-slate-200 group-hover:scale-110 transition-transform`}>
+          {icon}
+        </div>
+        <span className="text-sm font-semibold">{label}</span>
+      </div>
+      <span className="font-mono font-bold text-lg">{value}%</span>
+    </div>
+    <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+      <div 
+        className={`h-full ${color} ${shadow} shadow-lg transition-all duration-1000 ease-out`} 
+        style={{ width: `${value}%` }}
+      ></div>
     </div>
   </div>
 );
 
-const AlertItem = ({ country, status, type }) => {
-  const colors = {
-    success: "bg-emerald-500",
-    warning: "bg-amber-500",
-    info: "bg-blue-500"
-  };
-  return (
-    <div className="flex items-center justify-between text-xs p-2 bg-slate-950/50 rounded-lg border border-slate-800">
-      <span className="font-medium">{country}</span>
-      <span className={`px-2 py-0.5 rounded text-[10px] ${colors[type]} text-white font-bold`}>{status}</span>
-    </div>
-  );
-};
-
-const ProgressCircle = ({ label, value, icon }) => (
-  <div>
-    <div className="flex justify-between text-xs mb-2 italic text-slate-400">
-      <span className="flex items-center gap-1">{icon} {label}</span>
-      <span>{value}%</span>
-    </div>
-    <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-      <div className="h-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" style={{ width: `${value}%` }}></div>
-    </div>
-  </div>
-);
-
-export default GlobalPulse;
+export default SpainEnergyMonitor;
