@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Energy Monitor — Mapa de Intensidad CO₂</title>
+  <meta name="description" content="Mapa mundial interactivo de consumo eléctrico, mix energético e intensidad de carbono por país." />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <h1>⚡ World Energy Monitor</h1>
+      <p class="subtitle">Intensidad de CO₂ · Mix energético · Tendencias 2010–2024</p>
+    </div>
+    <div class="header-buttons">
+      <button class="view-btn active" id="btn-co2" onclick="setView('co2')">CO₂ Intensidad</button>
+      <button class="view-btn" id="btn-renewables" onclick="setView('renewables')">% Renovables</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <p class="stat-label">País más limpio</p>
+      <p class="stat-value green">Paraguay</p>
+      <p class="stat-sub">~2 g CO₂/kWh</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">País más contaminante</p>
+      <p class="stat-value red">Mongolia</p>
+      <p class="stat-sub">~900 g CO₂/kWh</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">Media mundial</p>
+      <p class="stat-value">436 g/kWh</p>
+      <p class="stat-sub">CO₂ por kWh</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">Países &gt; 50% renovable</p>
+      <p class="stat-value blue">38</p>
+      <p class="stat-sub">de 195 países</p>
+    </div>
+  </div>
+
+  <div class="map-layout">
+    <div class="map-container">
+      <div id="map"></div>
+      <div class="legend">
+        <span class="legend-label" id="legend-low">0 g/kWh</span>
+        <div class="legend-bar" id="legend-bar"></div>
+        <span class="legend-label" id="legend-high">900+ g/kWh</span>
+      </div>
+    </div>
+
+    <aside id="detail-panel" class="detail-panel hidden">
+      <div class="detail-card">
+        <p class="detail-country" id="d-country">—</p>
+        <p class="detail-co2" id="d-co2">—</p>
+      </div>
+      <div class="detail-card">
+        <p class="detail-section-title">Mix energético</p>
+        <div class="donut-wrap">
+          <canvas id="donut-chart"></canvas>
+        </div>
+        <div id="donut-legend" class="donut-legend"></div>
+      </div>
+      <div class="detail-card">
+        <p class="detail-section-title">Tendencia CO₂ (2010→2024)</p>
+        <div class="trend-wrap">
+          <canvas id="trend-chart"></canvas>
+        </div>
+      </div>
+      <div class="detail-card sources">
+        <p class="detail-section-title">Fuentes de datos</p>
+        <ul>
+          <li><a href="https://app.electricitymaps.com/" target="_blank">Electricity Maps</a></li>
+          <li><a href="https://ourworldindata.org/energy" target="_blank">Our World in Data</a></li>
+          <li><a href="https://iea.org/" target="_blank">IEA — International Energy Agency</a></li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer>
+  <p>Datos: <a href="https://ourworldindata.org/energy" target="_blank">Our World in Data</a> · <a href="https://app.electricitymaps.com/" target="_blank">Electricity Maps</a> · <a href="https://iea.org/" target="_blank">IEA</a> &nbsp;|&nbsp; Desarrollado con D3.js + Chart.js</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
